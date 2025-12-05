@@ -287,17 +287,20 @@ def export_to_excel(analyzer, person_fte, ops_activities, ops_by_person):
 
 def export_all_charts_as_zip(figures_dict):
     """Export all plotly figures as PNG images in a ZIP file"""
-    zip_buffer = BytesIO()
+    try:
+        zip_buffer = BytesIO()
 
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        for filename, fig in figures_dict.items():
-            # Convert figure to PNG image
-            img_bytes = fig.to_image(format='png', width=1200, height=600)
-            # Add to ZIP file
-            zip_file.writestr(f"{filename}.png", img_bytes)
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for filename, fig in figures_dict.items():
+                # Convert figure to PNG image
+                img_bytes = fig.to_image(format='png', width=1200, height=600)
+                # Add to ZIP file
+                zip_file.writestr(f"{filename}.png", img_bytes)
 
-    zip_buffer.seek(0)
-    return zip_buffer
+        zip_buffer.seek(0)
+        return zip_buffer
+    except Exception as e:
+        raise Exception(f"Kaleido/Chrome není k dispozici: {str(e)}")
 
 
 # Streamlit App
@@ -608,7 +611,8 @@ def main():
                             mime="application/zip"
                         )
                 except Exception as e:
-                    st.error(f"Nepodařilo se vytvořit export grafů: {str(e)}")
+                    st.warning("⚠️ Export grafů není dostupný na Streamlit Cloud")
+                    st.info("💡 Pro export grafů spusťte aplikaci lokálně nebo použijte screenshot")
 
         except Exception as e:
             st.error(f"❌ Chyba při zpracování souboru: {str(e)}")
